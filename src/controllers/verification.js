@@ -37,7 +37,7 @@ const verifyUpload = async (fileBuffer, fileName, customerId) => {
 
     //Upload
     try {
-        const uploadResult = await uploadFile(fileBuffer, fileName)
+        const uploadResult = await uploadFile(fileBuffer, fileName, customerId)
         logger.info({ uploadResult }, "Document upload successfull");
     } catch (err) {
         logger.error(err, "Document upload failed. Proceeding without upload...")
