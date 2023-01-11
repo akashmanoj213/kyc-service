@@ -1,3 +1,4 @@
 {
-    "storageBucketName": "sahi-kyc-uploads"
+    "storageBucketName": "sahi-kyc-uploads",
+    "processUserTopic": "projects/pruinhlth-nprd-dev-scxlyx-7250/topics/processUser"
 }

@@ -1,3 +1,5 @@
 {
-    "storageBucketName": "kyc_uploads"
+    "storageBucketName": "kyc_uploads",
+    "projectId":"excellent-zoo-370614",
+    "processUserTopic": "projects/excellent-zoo-370614/topics/processUser"
 }

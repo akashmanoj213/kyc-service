@@ -1,6 +1,9 @@
-const { verifyDoc } = require('../services/digioClient');
-const { getFileAsBuffer, uploadFile } = require('../services/storageClient');
-const { logger } = require("../api/middlewares/logger");
+const { verifyDoc } = require('../utils/clients/digioClient');
+const { getFileAsBuffer } = require('../utils/clients/storageClient');
+const { uploadFile } = require('../utils/clients/documentUpload');
+const {publishMessage} = require('../utils/clients/pubSubClient');
+
+const { logger } = require("../utils/logger");
 
 const verifyKyc = async (fileName) => {
     try {
@@ -17,31 +20,43 @@ const verifyKyc = async (fileName) => {
     }
 }
 
-const uploadVerify = async (fileBuffer, fileType) => {
-    return new Promise((res, rej) => {
-        Promise.allSettled([uploadFile(fileBuffer, fileType), verifyDoc(fileBuffer)]).then(results => {
-            const [uploadResult, verifyDocResult] = results;
+const verifyUpload = async (fileBuffer, fileName, customerId) => {
+    //Verification
+    const result = await verifyDoc(fileBuffer);
 
-            if (verifyDocResult.status === 'rejected') {
-                rej(`Verification failed with error - ${verifyDocResult.reason}. Please try again`);
-            } else {
-                logger.info("Verification succesffull");
-            }
+    if (!result.verified) {
+        const data = {
+            customerId,
+            isVerified: false
+        };
+        await publishResult(data);
 
-            if (uploadResult.status === 'rejected') {
-                rej(`Document upload failed with error - ${uploadResult.reason}. Proceeding without upload...`);
-            } else {
-                logger.info("Upload succesffull", uploadResult.value);
-            }
+        return null;
+    }
 
-            const result = verifyDocResult.value;
-            logger.info(`Verification result : ${result.verified}`)
-            res(result);
-        }).catch(err => rej(err));
-    });
+    //Upload
+    try {
+        const uploadResult = await uploadFile(fileBuffer, fileName)
+        logger.info({ uploadResult }, "Document upload successfull");
+    } catch (err) {
+        logger.error(err, "Document upload failed. Proceeding without upload...")
+    }
+
+    const data = {
+        customerId,
+        isVerified: true
+    };
+    await publishResult(data);
+
+    return result;
+}
+
+const publishResult = async (data) => {
+    const PAYMENT_TOPIC = config.get("processUserTopic"); 
+    await publishMessage(data, PAYMENT_TOPIC);
 }
 
 module.exports = {
     verifyKyc,
-    uploadVerify
+    verifyUpload
 }
