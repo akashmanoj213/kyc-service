@@ -1,12 +1,6 @@
-const config = require('config');
 const uuid = require("uuid");
 const { Storage } = require('@google-cloud/storage');
 const stream = require('stream');
-
-const bucketName = config.get("storageBucketName");
-
-const storage = new Storage();
-const myBucket = storage.bucket(bucketName);
 
 const getFileAsBuffer = async (fileName) => {
     // Downloads the file into a buffer in memory.
@@ -15,7 +9,9 @@ const getFileAsBuffer = async (fileName) => {
     return contents[0];
 }
 
-const uploadFile = (fileBuffer, fileType) => {
+const uploadFile = (fileBuffer, fileType, bucketName) => {
+    const storage = new Storage();
+    const myBucket = storage.bucket(bucketName);
     const destFileName = uuid.v4() + fileType;
     const file = myBucket.file(destFileName);
 

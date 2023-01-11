@@ -1,25 +1,9 @@
 const { verifyDoc } = require('../utils/clients/digioClient');
-const { getFileAsBuffer } = require('../utils/clients/storageClient');
 const { uploadFile } = require('../utils/clients/documentUpload');
 const { publishMessage } = require('../utils/clients/pubSubClient');
 const config = require('config');
 
 const { logger } = require("../utils/logger");
-
-const verifyKyc = async (fileName) => {
-    try {
-        const fileBuffer = await getFileAsBuffer(fileName);
-
-        const result = await verifyDoc(fileBuffer);
-
-        logger.info(`Verification result : ${result.verified}`)
-
-        return result;
-    } catch (err) {
-        logger.error("Error occured during KYC verification :", err.message);
-        throw err;
-    }
-}
 
 const verifyUpload = async (fileBuffer, fileName, customerId) => {
     //Verification
@@ -58,6 +42,5 @@ const publishResult = async (data) => {
 }
 
 module.exports = {
-    verifyKyc,
     verifyUpload
 }
