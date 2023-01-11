@@ -1,7 +1,8 @@
 const { verifyDoc } = require('../utils/clients/digioClient');
 const { getFileAsBuffer } = require('../utils/clients/storageClient');
 const { uploadFile } = require('../utils/clients/documentUpload');
-const {publishMessage} = require('../utils/clients/pubSubClient');
+const { publishMessage } = require('../utils/clients/pubSubClient');
+const config = require('config');
 
 const { logger } = require("../utils/logger");
 
@@ -52,7 +53,7 @@ const verifyUpload = async (fileBuffer, fileName, customerId) => {
 }
 
 const publishResult = async (data) => {
-    const PAYMENT_TOPIC = config.get("processUserTopic"); 
+    const PAYMENT_TOPIC = config.get("processUserTopic");
     await publishMessage(data, PAYMENT_TOPIC);
 }
 
