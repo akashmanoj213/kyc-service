@@ -18,7 +18,7 @@ const publishMessage = async (data, topicName, attributes = {}) => {
 
         const messageId = await pubSubClient
             .topic(topicName)
-            .publish(dataBuffer, attributes)
+            .publish(dataBuffer, attributes);
 
         logger.info(`Message ${messageId} published.`);
         return messageId;

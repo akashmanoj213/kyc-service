@@ -2,7 +2,7 @@ const axios = require('axios').default;
 const FormData = require('form-data');
 const { getTraceId } = require('../traceId')
 
-const post = async (url, body, config = null, includeTrace = false) => {
+const post = async (url, body, config = {}, includeTrace = false) => {
     const { params = null, headers = null } = config;
 
     if (includeTrace) {

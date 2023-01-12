@@ -1,10 +1,12 @@
 const bunyan = require('bunyan');
 const { LoggingBunyan,  LOGGING_TRACE_KEY } = require('@google-cloud/logging-bunyan');
 
+const serviceName = process.env.SERVICE_NAME
+
 // Creates a Bunyan Cloud Logging client
 const loggingBunyan = new LoggingBunyan({
     serviceContext: {
-        service: 'payment-service-1', // required to report logged errors
+        service: serviceName, // required to report logged errors
         // to the Google Cloud Error Reporting
         // console
         version: 'version-1'
@@ -21,8 +23,8 @@ const streams = process.env.NODE_ENV === "production" ? [loggingBunyan.stream('i
 
 const logger = bunyan.createLogger({
     // The JSON payload of the log as it appears in Cloud Logging
-    // will contain "name": "payment_service"
-    name: 'payment_service_0',
+    // will contain "name": SERVICE_NAME
+    name: serviceName,
     serializers: bunyan.stdSerializers,
     streams,
 });
