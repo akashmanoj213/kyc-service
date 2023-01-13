@@ -7,15 +7,21 @@ const { setTraceId } = require("../../utils/traceId");
 if(!config.has("projectId")) console.log("Please set projectId in config files");
 
 const PROJECT_ID = config.get("projectId");
+const serviceName = process.env.SERVICE_NAME;
 
 const loggerMiddleware = (req, res, next) => {
     const requestStartMs = Date.now();
-    const traceId = extractTraceId(req);
+    const {traceId, isNew} = extractTraceId(req);
+
+    const trace = `projects/${PROJECT_ID}/traces/${traceId}`;
+    logger.info({[LOGGING_TRACE_KEY]: trace}, `${serviceName}: Processing request... `);
+    if(isNew) {
+        logger.info({[LOGGING_TRACE_KEY]: trace}, `traceId not found in request. Generating new traceId: ${traceId}`);
+    }
 
     setTraceId(traceId);
-    const trace = `projects/${PROJECT_ID}/traces/${traceId}`;
 
-    req.log = logger.child({[LOGGING_TRACE_KEY]: trace})
+    req.log = logger.child({[LOGGING_TRACE_KEY]: trace});
 
     res.on("finish", () => {
         const latencyMilliseconds = Date.now() - requestStartMs;
@@ -81,21 +87,26 @@ const createResponse = (res, latencyMilliseconds) => {
 
 const extractTraceId = (req) => {
     let traceId;
+    let isNew = false;
+    
     try {
         if(req.headers['trace-id']) {
-            traceId = req.headers['trace-id']
+            traceId = req.headers['trace-id'];
         } else if(req.body && req.body.message && req.body.message.attributes && req.body.message.attributes.traceId) {
             traceId = req.body.message.attributes.traceId;
         } else {
             traceId = uuid.v4();
-            logger.info("TraceId not found. Using new traceId:", traceId);
+            isNew = true;
         }
     } catch (err) {
         traceId = uuid.v4();
-        logger.error(err, `Error occured while retrieving traceId. Using new traceId: ${traceId}`);
+        isNew = true;
     }
 
-    return traceId;
+    return {
+        traceId,
+        isNew
+    };
 }
 
 module.exports = loggerMiddleware;
