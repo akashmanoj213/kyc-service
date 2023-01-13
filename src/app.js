@@ -1,18 +1,17 @@
-
 const express = require('express');
 const cors = require('cors');
 const verificationRoutes = require('./api/routes/verification');
-const traceLogger = require('./api/middlewares/traceLogger');
+const loggerMiddleware = require('./api/middlewares/loggerMiddleware');
 const errorHandler = require('./api/middlewares/errorHandler');
 
 const app = express();
 
 //Application Middlewares
-app.use(traceLogger);
-
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(loggerMiddleware);
 
 app.get('/', (req, res) => {
     res.status(200).send('Api is working properly!');
@@ -20,6 +19,7 @@ app.get('/', (req, res) => {
 
 //Routes
 app.use('/verification', verificationRoutes);
+
 
 //Global Error handling
 app.use(errorHandler);
