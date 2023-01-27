@@ -16,7 +16,7 @@ const verifyDoc = async (front_part_buffer, back_part_buffer) => {
 
     const token = createToken(clientId, clientSecret);
 
-    let data;
+    let extractedData;
 
     try {
         const result = await axios.post('https://ext.digio.in:444/v4/client/kyc/analyze/file/idcard', form, {
@@ -26,35 +26,33 @@ const verifyDoc = async (front_part_buffer, back_part_buffer) => {
             }
         });
 
-        data = result.data;
-    } catch (err) {
-        logger.error(err, "Digio returned bad request error. File not supported.");
+        const { detections } = result.data;
+        extractedData = detections[0];
+
+        //Extract id_attributes
+        const { id_attributes } = extractedData;
         return {
-            verified: false,
-            data
+            verified: true,
+            data: id_attributes
+        };
+    } catch (err) {
+        if (err.code === "ERR_BAD_REQUEST") {
+            const { response: { data } } = err;
+
+            const message = data.message;
+
+            logger.error(err, "Digio returned bad request error.", message);
+
+            return {
+                verified: false,
+                data: {
+                    message
+                }
+            };
         }
-        // logger.warn("Digio request failed, Mocking temporarly...");
-        // data = {
-        //     id_type: "AADHAAR",
-        //     name: "Apurva Mukherjee",
-        //     id_no: "325424241580",
-        //     dob: "09/12/1994",
-        //     gender: "Male"
-        // }
-    }
 
-    const { id_type, id_card_verification_response = {} } = data;
-    const { verified } = id_card_verification_response;
-
-    let verifyResult = false;
-
-    if (id_type && (id_type === "AADHAAR" || verified)) {
-        verifyResult = true;
-    }
-
-    return {
-        verified: verifyResult,
-        data
+        logger.error(err, "Error occured while sending request to Digio!");
+        throw err;
     }
 }
 
