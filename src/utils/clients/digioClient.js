@@ -30,10 +30,25 @@ const verifyDoc = async (front_part_buffer, back_part_buffer) => {
         extractedData = detections[0];
 
         //Extract id_attributes
-        const { id_attributes } = extractedData;
+        const { id_attributes, id_type } = extractedData;
+
+        if(Object.keys(id_attributes).length === 0) {
+            logger.error("Digio verified successfully yet did not return data.");
+
+            return {
+                verified: false,
+                data: {
+                    message: "Invalid document. Please upload valid KYC document!"
+                }
+            };
+        }
+        
         return {
             verified: true,
-            data: id_attributes
+            data: {
+                id_type,
+                ...id_attributes
+            }
         };
     } catch (err) {
         if (err.code === "ERR_BAD_REQUEST") {
