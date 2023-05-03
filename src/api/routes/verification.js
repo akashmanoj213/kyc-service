@@ -32,7 +32,7 @@ router.post('/kyc-upload', upload.single('front_part'), async (req, res) => {
     }
 });
 
-router.get("/health1", (req, res) => res.send(200));
+router.get("/health", (req, res) => res.send(200));
 
 router.get("/startup", (req, res) => res.send(200));
 
