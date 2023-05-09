@@ -74,6 +74,7 @@ const verifyDoc = async (front_part_buffer, back_part_buffer) => {
 
 const verifyPanNumber = async (panNumber, fullName, dob) => {
     try {
+        const token = createToken(clientId, clientSecret);
         const config = {
             headers: {
                 "Content-Type": "application/json",
