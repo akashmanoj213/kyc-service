@@ -1,4 +1,4 @@
-const { verifyDoc } = require('../utils/clients/digioClient');
+const { verifyDoc, verifyPanNumber } = require('../utils/clients/digioClient');
 const { uploadFile } = require('../utils/clients/documentUpload');
 const { publishMessage } = require('../utils/clients/pubSubClient');
 const config = require('config');
@@ -36,11 +36,17 @@ const verifyUpload = async (fileBuffer, fileName, customerId) => {
     return result;
 }
 
+const verifyPan = async (panNumber, fullName, dob) => {
+    const result = await verifyPanNumber(panNumber, fullName, dob);
+    return result;
+}
+
 const publishResult = async (data) => {
     const PAYMENT_TOPIC = config.get("processUserTopic");
     await publishMessage(data, PAYMENT_TOPIC);
 }
 
 module.exports = {
-    verifyUpload
+    verifyUpload,
+    verifyPan
 }

@@ -1,6 +1,6 @@
 const express = require('express');
 const { success, error } = require('./util');
-const { verifyUpload } = require("../../controllers/verification");
+const { verifyUpload, verifyPan } = require("../../controllers/verification");
 const multer = require('multer');
 
 const storage = multer.memoryStorage()
@@ -32,8 +32,27 @@ router.post('/kyc-upload', upload.single('front_part'), async (req, res) => {
     }
 });
 
-router.get("/health", (req, res) => res.send(200));
+router.post('/pan', async (req, res) => {
+    try {
+        req.log.info("Pan number verification initiated...");
 
-router.get("/startup", (req, res) => res.send(200));
+        const { panNumber, fullName, dob } = req.body;
+
+        if (!panNumber || !fullName || !dob) {
+            return res.status(400).json(success(res.statusCode, "Invalid request. Please provide valid panNumber, fullName and dob."));
+        }
+
+        const result = await verifyPan(panNumber, fullName, dob);
+
+        if (!result.verified) {
+            return res.status(400).json(success(res.statusCode, `PAN Verification failed!`));
+        }
+
+        return res.status(200).json(success(res.statusCode, "PAN verified successfully", result));
+    } catch (err) {
+        req.log.error(err, "Error occured in PAN verification API");
+        return res.status(500).json(error(res.statusCode, err.message));
+    }
+})
 
 module.exports = router;

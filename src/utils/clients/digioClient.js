@@ -1,6 +1,7 @@
 const axios = require('axios').default;
 var FormData = require('form-data');
 const { logger } = require("../../utils/logger");
+const { post } = require("./axiosClient");
 
 const clientId = process.env.DIGIO_CLIENT_ID;
 const clientSecret = process.env.DIGIO_CLIENT_SECRET;
@@ -32,7 +33,7 @@ const verifyDoc = async (front_part_buffer, back_part_buffer) => {
         //Extract id_attributes
         const { id_attributes, id_type } = extractedData;
 
-        if(Object.keys(id_attributes).length === 0) {
+        if (Object.keys(id_attributes).length === 0) {
             logger.error("Digio verified successfully yet did not return data.");
 
             return {
@@ -42,7 +43,7 @@ const verifyDoc = async (front_part_buffer, back_part_buffer) => {
                 }
             };
         }
-        
+
         return {
             verified: true,
             data: {
@@ -71,11 +72,43 @@ const verifyDoc = async (front_part_buffer, back_part_buffer) => {
     }
 }
 
+const verifyPanNumber = async (panNumber, fullName, dob) => {
+    try {
+        const config = {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Basic ${token}`
+            }
+        };
+
+        const data = { panNumber, fullName, dob };
+
+        const result = await post("https://ext.digio.in:444/v3/client/kyc/pan/verify", data, config);
+
+        const { is_pan_dob_valid, name_matched } = result.data;
+
+        const verified = is_pan_dob_valid && name_matched;
+
+        return {
+            verified,
+            data: {
+                is_pan_dob_valid,
+                name_matched
+            }
+        };
+
+    } catch (error) {
+        logger.error(err, "Error occured while sending request to Digio!");
+        throw err;
+    }
+}
+
 const createToken = (clientId, clientSecret) => {
     const tokenBuffer = Buffer.from(`${clientId}:${clientSecret}`);
     return tokenBuffer.toString('base64');
 }
 
 module.exports = {
-    verifyDoc
+    verifyDoc,
+    verifyPanNumber
 }

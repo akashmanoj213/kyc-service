@@ -2,7 +2,7 @@ const axios = require('axios').default;
 
 const token = process.env.ARYA_AI_TOKEN;
 
-const verifyDoc = (base64Data, documentType, requestId ) => {
+const verifyDoc = async (base64Data, documentType, requestId ) => {
     const requestBody = {
         "doc_type": documentType,
         "req_id": requestId,

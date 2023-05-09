@@ -13,13 +13,16 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(loggerMiddleware);
 
-app.get('/', (req, res) => {
-    res.status(200).send('Api is working properly!');
+app.get('/health', (req, res) => {
+    res.status(200).send('Service running successfully...');
+});
+
+app.get('/startup', (req, res) => {
+    res.status(200).send('Service started successfully!');
 });
 
 //Routes
 app.use('/verification', verificationRoutes);
-
 
 //Global Error handling
 app.use(errorHandler);
