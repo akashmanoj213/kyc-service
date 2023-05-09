@@ -81,9 +81,13 @@ const verifyPanNumber = async (panNumber, fullName, dob) => {
             }
         };
 
+        logger.info("token", token);
+
         const data = { panNumber, fullName, dob };
 
         const result = await post("https://ext.digio.in:444/v3/client/kyc/pan/verify", data, config);
+
+        logger.info("result:", result.data);
 
         const { is_pan_dob_valid, name_matched } = result.data;
 
@@ -97,7 +101,7 @@ const verifyPanNumber = async (panNumber, fullName, dob) => {
             }
         };
 
-    } catch (error) {
+    } catch (err) {
         logger.error(err, "Error occured while sending request to Digio!");
         throw err;
     }
