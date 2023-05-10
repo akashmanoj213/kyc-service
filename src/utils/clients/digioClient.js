@@ -90,9 +90,9 @@ const verifyPanNumber = async (panNumber, fullName, dob) => {
 
         const result = await post("https://ext.digio.in:444/v3/client/kyc/pan/verify", data, config);
 
-        logger.info("result:", result.data);
+        logger.info("result:", result);
 
-        const { is_pan_dob_valid, name_matched } = result.data;
+        const { is_pan_dob_valid, name_matched } = result;
 
         const verified = is_pan_dob_valid && name_matched;
 
