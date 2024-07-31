@@ -1,6 +1,6 @@
 const express = require('express');
 const { success, error } = require('./util');
-const { verifyUpload, verifyPan } = require("../../controllers/verification");
+const { verifyUpload, verifyPan, createKyc } = require("../../controllers/verification");
 const multer = require('multer');
 
 const storage = multer.memoryStorage()
@@ -54,5 +54,23 @@ router.post('/pan', async (req, res) => {
         return res.status(500).json(error(res.statusCode, err.message));
     }
 })
+
+router.post('/create-kyc', async (req, res) => {
+    try {
+        req.log.info("New KYC request initiated...");
+        const { customer_identifier, customer_name, template_name } = req.body;
+
+        if (!customer_identifier || !customer_name || !template_name) {
+            return res.status(400).json(success(res.statusCode, "Invalid request. Please provide valid details."));
+        }
+        const result = await createKyc(req.body);
+        return res.status(200).json(success(res.statusCode, "KYC created successfully", result));
+    } catch (err) {
+        req.log.error(err, "Error occured in KYC creation");
+        return res.status(500).json(error(res.statusCode, err.message));
+    }
+})
+
+
 
 module.exports = router;

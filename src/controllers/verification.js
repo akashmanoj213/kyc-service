@@ -1,4 +1,4 @@
-const { verifyDoc, verifyPanNumber } = require('../utils/clients/digioClient');
+const { verifyDoc, verifyPanNumber, createKycRequest } = require('../utils/clients/digioClient');
 const { uploadFile } = require('../utils/clients/documentUpload');
 const { publishMessage } = require('../utils/clients/pubSubClient');
 const config = require('config');
@@ -41,6 +41,11 @@ const verifyPan = async (panNumber, fullName, dob) => {
     return result;
 }
 
+const createKyc = async (kycDetails) => {
+    const result = await createKycRequest(kycDetails);
+    return result;
+}
+
 const publishResult = async (data) => {
     const PAYMENT_TOPIC = config.get("processUserTopic");
     await publishMessage(data, PAYMENT_TOPIC);
@@ -48,5 +53,6 @@ const publishResult = async (data) => {
 
 module.exports = {
     verifyUpload,
-    verifyPan
+    verifyPan,
+    createKyc
 }
