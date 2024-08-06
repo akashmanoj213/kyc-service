@@ -5,6 +5,7 @@ const { post } = require("./axiosClient");
 
 const clientId = process.env.DIGIO_CLIENT_ID;
 const clientSecret = process.env.DIGIO_CLIENT_SECRET;
+const digioUrl = process.env.DIGIO_CLIENT_URL
 
 const verifyDoc = async (front_part_buffer, back_part_buffer) => {
   const form = new FormData();
@@ -130,7 +131,7 @@ const createKycRequest = async (kycDetails) => {
     };
 
     const result = await post(
-      "https://ext.digio.in:444/client/kyc/v2/request/with_template",
+      digioUrl+"/kyc/v2/request/with_template",
       kycDetails,
       config
     );
