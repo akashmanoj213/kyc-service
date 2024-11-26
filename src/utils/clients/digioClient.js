@@ -2,15 +2,19 @@ const axios = require("axios").default;
 var FormData = require("form-data");
 const { logger } = require("../../utils/logger");
 const { post } = require("./axiosClient");
+const { v4: uuidv4 } = require("uuid");
 
 const clientId = process.env.DIGIO_CLIENT_ID;
 const clientSecret = process.env.DIGIO_CLIENT_SECRET;
-const digioUrl = process.env.DIGIO_CLIENT_URL
+const digioUrl = process.env.DIGIO_CLIENT_URL;
 
 const verifyDoc = async (front_part_buffer, back_part_buffer) => {
+  const uniqueId = uuidv4();
+
   const form = new FormData();
   form.append("front_part", front_part_buffer);
   form.append("should_verify", "true");
+  form.append("unique_request_id", uniqueId);
 
   if (back_part_buffer) {
     form.append("back_part", back_part_buffer, "document_back.jpeg");
@@ -32,6 +36,11 @@ const verifyDoc = async (front_part_buffer, back_part_buffer) => {
       }
     );
 
+    logger.info("Digio result:", result.data);
+
+    const {
+      details: { status },
+    } = result.data;
     const { detections } = result.data;
     extractedData = detections[0];
 
@@ -43,6 +52,7 @@ const verifyDoc = async (front_part_buffer, back_part_buffer) => {
 
       return {
         verified: false,
+        unique_request_id: uniqueId,
         data: {
           message: "Invalid document. Please upload valid KYC document!",
         },
@@ -50,7 +60,8 @@ const verifyDoc = async (front_part_buffer, back_part_buffer) => {
     }
 
     return {
-      verified: true,
+      verified: status,
+      unique_request_id: uniqueId,
       data: {
         id_type,
         ...id_attributes,
@@ -68,6 +79,7 @@ const verifyDoc = async (front_part_buffer, back_part_buffer) => {
 
       return {
         verified: false,
+        unique_request_id: uniqueId,
         data: {
           message,
         },
@@ -131,7 +143,7 @@ const createKycRequest = async (kycDetails) => {
     };
 
     const result = await post(
-      digioUrl+"/kyc/v2/request/with_template",
+      digioUrl + "/kyc/v2/request/with_template",
       kycDetails,
       config
     );
