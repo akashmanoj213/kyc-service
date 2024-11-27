@@ -125,7 +125,6 @@ router.get("/get-server-ip", async (req, res) => {
     const ipifyIp = response.data;
     const ifConfigIp = response2.data;
 
-    req.log.info(`Server IP: ${serverIp}`);
     return res.status(200).json(
       success(res.statusCode, "Server IP fetched successfully", {
         ipifyIp,
