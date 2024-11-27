@@ -1,4 +1,5 @@
 const express = require("express");
+const axios = require("axios");
 const { success, error } = require("./util");
 const {
   verifyUpload,
@@ -130,14 +131,12 @@ router.get("/get-server-ip", async (req, res) => {
     const serverIp = response.data.ip;
 
     req.log.info(`Server IP: ${serverIp}`);
-    return res
-      .status(200)
-      .json(
-        success(res.statusCode, "Server IP fetched successfully", {
-          serverIp,
-          res: res.data,
-        })
-      );
+    return res.status(200).json(
+      success(res.statusCode, "Server IP fetched successfully", {
+        serverIp,
+        res: res.data,
+      })
+    );
   } catch (err) {
     req.log.error(err, "Error occurred while fetching server IP");
     return res
