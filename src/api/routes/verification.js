@@ -120,21 +120,16 @@ router.get("/get-server-ip", async (req, res) => {
     // Make a request to a third-party service that returns the caller's IP
     // Replace with the actual third-party API endpoint
     const response = await axios.get("https://api.ipify.org?format=json");
-    const res = await axios.get("https://ifconfig.me/ip");
+    const response2 = await axios.get("https://ifconfig.me/ip");
 
-    if (response.status !== 200) {
-      const message = `Failed to fetch server IP. Third-party API returned status: ${response.status}`;
-      req.log.error(message);
-      return res.status(500).json(error(res.statusCode, message));
-    }
-
-    const serverIp = response.data.ip;
+    const ipifyIp = response.data;
+    const ifConfigIp = response2.data;
 
     req.log.info(`Server IP: ${serverIp}`);
     return res.status(200).json(
       success(res.statusCode, "Server IP fetched successfully", {
-        serverIp,
-        res: res.data,
+        ipifyIp,
+        ifConfigIp,
       })
     );
   } catch (err) {
